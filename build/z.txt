@@ -1,0 +1,166 @@
+#define _CRT_SECURE_NO_WARNINGS
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <windows.h>
+
+#define FILE_NAME "20242044.txt"
+
+typedef struct
+{
+    char name[50];
+    char phone[30];
+} Contact;
+
+/* 1. 打印联系人 */
+void printContacts()
+{
+    FILE* fp = fopen(FILE_NAME, "r");
+
+    if (fp == NULL)
+    {
+        printf("\n没有联系人信息！\n");
+        return;
+    }
+
+    Contact c;
+    int count = 0;
+
+    printf("\n===== 联系人列表 =====\n");
+
+    while (fscanf(fp, "%49s %29s", c.name, c.phone) == 2)
+    {
+        printf("姓名: %-15s 电话: %s\n", c.name, c.phone);
+        count++;
+    }
+
+    if (count == 0)
+    {
+        printf("没有联系人信息！\n");
+    }
+
+    fclose(fp);
+}
+
+/* 2. 注册联系人 */
+void addContact()
+{
+    FILE* fp = fopen(FILE_NAME, "a");
+
+    if (fp == NULL)
+    {
+        printf("文件打开失败！\n");
+        return;
+    }
+
+    Contact c;
+
+    printf("请输入姓名: ");
+    scanf("%49s", c.name);
+
+    printf("请输入电话号码: ");
+    scanf("%29s", c.phone);
+
+    fprintf(fp, "%s %s\n", c.name, c.phone);
+
+    fclose(fp);
+
+    printf("联系人保存成功！\n");
+}
+
+/* 3. 删除联系人 */
+void deleteContact()
+{
+    FILE* fp = fopen(FILE_NAME, "r");
+
+    if (fp == NULL)
+    {
+        printf("没有联系人信息！\n");
+        return;
+    }
+
+    FILE* temp = fopen("temp.txt", "w");
+
+    if (temp == NULL)
+    {
+        fclose(fp);
+        printf("临时文件创建失败！\n");
+        return;
+    }
+
+    char target[50];
+    Contact c;
+    int found = 0;
+
+    printf("请输入要删除的姓名: ");
+    scanf("%49s", target);
+
+    while (fscanf(fp, "%49s %29s", c.name, c.phone) == 2)
+    {
+        if (strcmp(c.name, target) == 0)
+        {
+            found = 1;
+            continue;
+        }
+
+        fprintf(temp, "%s %s\n", c.name, c.phone);
+    }
+
+    fclose(fp);
+    fclose(temp);
+
+    remove(FILE_NAME);
+    rename("temp.txt", FILE_NAME);
+
+    if (found)
+        printf("删除成功！\n");
+    else
+        printf("未找到该联系人！\n");
+}
+
+/* 主函数 */
+int main(void)
+{
+    SetConsoleOutputCP(65001);
+    SetConsoleCP(65001);
+
+    int menu;
+
+    while (1)
+    {
+        printf("\n=====================\n");
+        printf("1. 打印联系人\n");
+        printf("2. 注册联系人\n");
+        printf("3. 删除联系人\n");
+        printf("4. 退出\n");
+        printf("=====================\n");
+        printf("请选择: ");
+
+        scanf("%d", &menu);
+
+        switch (menu)
+        {
+        case 1:
+            printContacts();
+            break;
+
+        case 2:
+            addContact();
+            break;
+
+        case 3:
+            deleteContact();
+            break;
+
+        case 4:
+            printf("程序结束。\n");
+            return 0;
+
+        default:
+            printf("输入错误，请重新选择！\n");
+        }
+    }
+
+    return 0;
+}
